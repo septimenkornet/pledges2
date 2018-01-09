@@ -242,7 +242,7 @@ def run(trim=False):
 
     lim = max(abs(totchanges.min()), totchanges.max()) * 1.1
 
-    totchanges.plot(
+    ax = totchanges.plot(
         kind='bar',
         legend=False,
         title="Percent change in total, year by year{}".format(tsuffix),
@@ -250,6 +250,11 @@ def run(trim=False):
         # grid=True
         # logy=True
     )
+
+    print('Median change in total, year to year{}: {}'.format(
+        ', trimmed' if trim else ', untrimmed',
+        totchanges.median()
+    ))
     # plt.show()
     plt.savefig('pics/totchanges{}.png'.format(tsuffix))
     # plt.savefig('pics/reupratios.png')
@@ -330,7 +335,7 @@ def run(trim=False):
     # plt.savefig('pics/biggesttwo.png')
     plt.close('all')
 
-    sums.plot(
+    ax = sums.plot(
         kind='bar',
         stacked=True,
         legend=False,
@@ -339,6 +344,12 @@ def run(trim=False):
         ylim = (0, 700000.0)
     )
     # plt.show()
+    sumrange = range(0, len(sums))
+    slope, intercept, r, p, stderr = stats.linregress(sumrange, sums)
+    print(slope, intercept, r, p, stderr)
+    linr = pd.Series([intercept + i * slope for i in sumrange], index=sums.index)
+    linr.plot(kind='line', ax=ax)
+    plt.show()
     plt.savefig('pics/totals{}.png'.format(tsuffix))
     # plt.savefig('pics/totals.png')
     plt.close('all')
