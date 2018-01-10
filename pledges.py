@@ -71,15 +71,7 @@ def reducehighest(s):
     return s
 
 
-def run(trim=False):
-    df = pd.read_excel(
-        # 'Y18 Pledges for MJS.xls',
-        # sheetname='Y17 & Y18',
-        'MJS File 12-14-17.xlsx',
-        # 'MJS File 12-14-17-no-outliers.xlsx',
-        sheetname='Sheet1',
-        header=None
-    )
+def run(df, trim=False):
 
     # These tags need to be put into the spreadsheet, in column A,
     # to show the program where line-item data begins and ends
@@ -339,12 +331,22 @@ def run(trim=False):
     slope, intercept, r, p, stderr = stats.linregress(sumrange, sums)
     print(slope, intercept, r, p, stderr)
     linr = pd.Series([intercept + i * slope for i in sumrange], index=sums.index)
+    # z = np.polyfit(sumrange, linr.values, 4)
+    # f = np.poly1d(z)
+    # plt.plot(sumrange, sums.values, 'ro')
+    # for x1 in np.linspace(0, sumrange[-1], 50):
+    #     plt.plot(x1, f(x1), 'b+')
+    # plt.show()
+    # Above gives essentially the same result as linregress. In other words, the detail is random.
+    # No there there.
+
+
     fig, ax  = plt.subplots()
     sums.plot(
         kind='bar',
         legend=False,
         title="Total pledging (2017 dollars){}".format(tsuffix),
-        ylim = (0, 700000.0)
+        ylim=(0, 700000.0)
     )
     ax2 = ax.twinx()
     ax2.set_ylim(0, 700000.0)
@@ -452,10 +454,21 @@ if __name__ == '__main__':
         help='Remove highest pledge from each year'
     )
     args = parser.parse_args()
+
     if args.debug:
         pdb.set_trace()
+
+    df = pd.read_excel(
+        # 'Y18 Pledges for MJS.xls',
+        # sheetname='Y17 & Y18',
+        'MJS File 12-14-17.xlsx',
+        # 'MJS File 12-14-17-no-outliers.xlsx',
+        sheetname='Sheet1',
+        header=None
+    )
+
     for t in (False, True):
-        run(trim=t)
+        run(df, trim=t)
 
 
 
