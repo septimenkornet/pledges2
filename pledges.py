@@ -335,20 +335,23 @@ def run(trim=False):
     # plt.savefig('pics/biggesttwo.png')
     plt.close('all')
 
-    ax = sums.plot(
-        kind='bar',
-        stacked=True,
-        legend=False,
-        title="Total pledging (2017 dollars){}".format(tsuffix),
-        # ylim=(0, 2.0 * sums.mean()),
-        ylim = (0, 700000.0)
-    )
+    # ax = sums.plot(
+    #     kind='bar',
+    #     stacked=True,
+    #     legend=False,
+    #     title="Total pledging (2017 dollars){}".format(tsuffix),
+    #     # ylim=(0, 2.0 * sums.mean()),
+    #     ylim = (0, 700000.0)
+    # )
     # plt.show()
     sumrange = range(0, len(sums))
     slope, intercept, r, p, stderr = stats.linregress(sumrange, sums)
     print(slope, intercept, r, p, stderr)
     linr = pd.Series([intercept + i * slope for i in sumrange], index=sums.index)
-    linr.plot(kind='line', ax=ax)
+    combined = pd.DataFrame({'Sum': sums, 'Regression': linr})
+    ax = combined['Regression'].plot(linestyle='-')
+    combined['Sum'].plot(kind='bar', ax=ax)
+    # linr.plot(ax=ax)
     plt.show()
     plt.savefig('pics/totals{}.png'.format(tsuffix))
     # plt.savefig('pics/totals.png')
