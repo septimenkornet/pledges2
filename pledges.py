@@ -71,33 +71,8 @@ def reducehighest(s):
     return s
 
 
-def run(df, trim=False):
+def run(tdf, trim=False):
 
-    # These tags need to be put into the spreadsheet, in column A,
-    # to show the program where line-item data begins and ends
-
-    hrow = df[df[0] == 'years']
-    d0 = df[df[0] == 'data start']
-    dn = df[df[0] == 'data end']
-    dstartrow = d0.index[0]
-    dendrow = dn.index[0] + 1
-    columns = hrow.iloc[0, :].where(isyear).dropna()
-
-    df = df.iloc[dstartrow:dendrow, columns.index].fillna(0)
-    df.columns = columns
-    df.reset_index(drop=True)
-
-
-    df.applymap(float)
-
-    inflation = pd.read_excel(
-        'inflation.xlsx',
-        index_col=0
-    )
-    avgs = inflation['Avg'].loc[columns.values]
-    reflators = avgs[2017] / avgs
-    df = df * reflators
-    tdf = df.replace(0, np.nan)
     if trim:
         tdf = tdf.apply(reducehighest)
         tsuffix = ' -- trimmed'
@@ -467,8 +442,33 @@ if __name__ == '__main__':
         header=None
     )
 
+    # These tags need to be put into the spreadsheet, in column A,
+    # to show the program where line-item data begins and ends
+
+    hrow = df[df[0] == 'years']
+    d0 = df[df[0] == 'data start']
+    dn = df[df[0] == 'data end']
+    dstartrow = d0.index[0]
+    dendrow = dn.index[0] + 1
+    columns = hrow.iloc[0, :].where(isyear).dropna()
+
+    df = df.iloc[dstartrow:dendrow, columns.index].fillna(0)
+    df.columns = columns
+    df.reset_index(drop=True)
+
+
+    df.applymap(float)
+
+    inflation = pd.read_excel(
+        'inflation.xlsx',
+        index_col=0
+    )
+    avgs = inflation['Avg'].loc[columns.values]
+    reflators = avgs[2017] / avgs
+    df = df * reflators
+    tdf = df.replace(0, np.nan)
     for t in (False, True):
-        run(df, trim=t)
+        run(tdf, trim=t)
 
 
 
