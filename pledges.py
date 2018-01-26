@@ -465,7 +465,8 @@ if __name__ == '__main__':
     df.reset_index(drop=True)
 
 
-    df.applymap(destring)
+    df = df.applymap(destring)
+    # df.applymap(float)
 
     inflation = pd.read_excel(
         'inflation.xlsx',
@@ -473,7 +474,8 @@ if __name__ == '__main__':
     )
     avgs = inflation['Avg'].loc[columns.values]
     reflators = avgs[2017] / avgs
-    df = df * reflators
+    # df = df * reflators
+    df = df.multiply(reflators)
     tdf = df.replace(0, np.nan)
     for t in (False, True):
         run(tdf, trim=t)
