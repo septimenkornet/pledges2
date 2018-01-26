@@ -6,6 +6,13 @@ import pdb
 import argparse
 from numba import jit
 
+def destring(x):
+    try:
+        res = float(x)
+    except:
+        res = 0.0
+    return res
+
 def histo(s, bins=None):
     h = np.histogram(s.dropna(), bins=bins)
     return pd.Series(h[0], index=h[1][0:-1])
@@ -436,7 +443,8 @@ if __name__ == '__main__':
     df = pd.read_excel(
         # 'Y18 Pledges for MJS.xls',
         # sheetname='Y17 & Y18',
-        'MJS File 12-14-17.xlsx',
+        # 'MJS File 12-14-17.xlsx',
+        'MJS File 1-22-18.xlsx',
         # 'MJS File 12-14-17-no-outliers.xlsx',
         sheetname='Sheet1',
         header=None
@@ -457,7 +465,7 @@ if __name__ == '__main__':
     df.reset_index(drop=True)
 
 
-    df.applymap(float)
+    df.applymap(destring)
 
     inflation = pd.read_excel(
         'inflation.xlsx',
