@@ -89,7 +89,14 @@ def run(tdf, trim=False):
     print("maxes{}:".format(tsuffix))
     print(maxs)
     medians = tdf.median()
+    print("medians{}:".format(tsuffix))
+    print(medians)
     sums = tdf.sum()
+    print("sums{}:".format(tsuffix))
+    print(sums)
+    pledges = tdf.count()
+    print("pledges{}:".format(tsuffix))
+    print(pledges)
     ginis = tdf.apply(gini)
     quantiles = tdf.apply(intervals, divisor=10)
     pctbiggest = (maxs / sums) * 100
@@ -463,6 +470,8 @@ if __name__ == '__main__':
     df = df.iloc[dstartrow:dendrow, columns.index].fillna(0)
     df.columns = columns
     df.reset_index(drop=True)
+    print("totals un-adjusted {}:")
+    print(df.sum()),
 
 
     df = df.applymap(destring)
