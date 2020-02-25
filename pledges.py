@@ -4,7 +4,6 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import pdb
 import argparse
-from numba import jit
 
 def destring(x):
     try:
@@ -49,7 +48,6 @@ def binsums(s, bins=10):
     sums, edges, binnumber = stats.binned_statistic(s, s, statistic='sum', bins=bins)
     return sums
 
-
 def counts(s, bins=10):
     counts, edges, binnumber = stats.binned_statistic(s, s, statistic='count', bins=bins)
     return counts
@@ -84,7 +82,7 @@ def run(tdf, trim=False):
         tdf = tdf.apply(reducehighest)
         tsuffix = ' -- trimmed'
     else:
-        tsuffix = '-- untrimmed'
+        tsuffix = ' -- untrimmed'
     maxs = tdf.max()
     print("maxes{}:".format(tsuffix))
     print(maxs)
@@ -102,14 +100,11 @@ def run(tdf, trim=False):
     pctbiggest = (maxs / sums) * 100
     totchanges = sums.pct_change().dropna() * 100
 
-
-
-
     bs = pd.DataFrame([
         binsums(
             tdf[col],
             bins=quantiles[col]
-        )
+            )
         for col in tdf.columns
         ],
         index = columns
@@ -181,8 +176,8 @@ def run(tdf, trim=False):
     reupnums = reupdf.apply(lambda x: x.value_counts())
     ax = reupnums.T.plot(
         kind='bar',
-        stacked=True,
-        title="New/renewed/fallen off, absolute number{}".format(tsuffix),
+        # stacked=True,
+        title="New/renewed/fallen off{}".format(tsuffix),
         figsize=(9,5),
     )
     box = ax.get_position()
@@ -258,7 +253,7 @@ def run(tdf, trim=False):
         kind='bar',
         stacked=True,
         legend=False,
-        title="Percent of total value by decile{}".format(tsuffix)
+        title="Percent of total by value decile{}".format(tsuffix)
     )
     # plt.show()
     # plt.savefig('pics/pctofvalue.png')
@@ -269,7 +264,7 @@ def run(tdf, trim=False):
         kind='bar',
         stacked=True,
         legend=False,
-        title="Number of pledges by decile{}".format(tsuffix)
+        title="Number of pledges by value decile{}".format(tsuffix)
     )
     # plt.show()
     plt.savefig('pics/numberbydecile{}.png'.format(tsuffix))
@@ -279,7 +274,7 @@ def run(tdf, trim=False):
         kind='bar',
         stacked=True,
         legend=False,
-        title="Percent of number of pledges by decile{}".format(tsuffix)
+        title="Percent of pledge number by value decile{}".format(tsuffix)
     )
     # plt.show()
     plt.savefig('pics/pctofnumber{}.png'.format(tsuffix))
@@ -289,7 +284,7 @@ def run(tdf, trim=False):
     medians.plot(
         kind='bar',
         legend=False,
-        title="Median pledge (2017 dollars){}".format(tsuffix),
+        title="Median pledge {}".format(tsuffix),
         # ylim=(0, 2.0 * medians.mean())
         ylim = (0, 3000.0)
     )
@@ -334,7 +329,7 @@ def run(tdf, trim=False):
     sums.plot(
         kind='bar',
         legend=False,
-        title="Total pledging (2017 dollars){}".format(tsuffix),
+        title="Total pledging {}".format(tsuffix),
         ylim=(0, 700000.0)
     )
     ax2 = ax.twinx()
@@ -346,12 +341,10 @@ def run(tdf, trim=False):
     plt.close('all')
 
     bins=np.logspace(1.0, 5.0, num=15)
-    # bins=np.logspace(1.0, 12, num=24, base=np.e)
     for year, s in tdf.iteritems():
         syear = str(year)
         ax = s.plot.hist(
             title=syear + tsuffix,
-            # bins=15
             bins=bins,
             logx=True,
             ylim=(0,50),
@@ -359,7 +352,8 @@ def run(tdf, trim=False):
         )
         ax.set_ylabel('Number of pledges')
         ax.set_xlabel('Amount of pledge')
-        plt.savefig('hists/{}{}.png'.format(
+        plt.savefig('hists/{}/{}{}.png'.format(
+            'trimmed' if trim else 'untrimmed',
             syear,
             tsuffix
         ))
@@ -381,15 +375,6 @@ def run(tdf, trim=False):
 
     for year, s in valbinned.iterrows():
         syear = str(year)
-        # ax = s.plot.bar(
-        #     title=syear + ' -- value ' + tsuffix,
-        #     logx=True,
-        #     width=np.diff(bins),
-        #     ylim=(0,valbinned.max().max()),
-        #     xlim=(1, 120000),
-        # )
-        # ax.set_ylabel('Total value of pledges')
-        # ax.set_xlabel('Amount of pledge')
         fig, ax = plt.subplots()
         ax.bar(
             s.index,
@@ -403,7 +388,8 @@ def run(tdf, trim=False):
         ax.set_title(syear + ' -- value ' + tsuffix)
         # ax.set_ylim(0, valbinned.max().max())
         ax.set_ylim(0, 50)
-        plt.savefig('valhist/{} -- value {}.png'.format(
+        plt.savefig('valhist/{}/{} -- value {}.png'.format(
+            'trimmed' if trim else 'untrimmed',
             syear,
             tsuffix
         ))
@@ -448,16 +434,12 @@ if __name__ == '__main__':
         pdb.set_trace()
 
     df = pd.read_excel(
-        # 'Y18 Pledges for MJS.xls',
-        # sheetname='Y17 & Y18',
-        # 'MJS File 12-14-17.xlsx',
-        'MJS File 1-29-18.xlsx',
-        # 'MJS File 12-14-17-no-outliers.xlsx',
-        sheetname='Sheet1',
+        '2020pledges.xls',
+        sheetname='Y19 & Y20',
         header=None
     )
 
-    # These tags need to be put into the spreadsheet, in column A,
+    # These tags -- 'years' etc. -- need to be put into the spreadsheet, in column A,
     # to show the program where line-item data begins and ends
 
     hrow = df[df[0] == 'years']
@@ -470,29 +452,19 @@ if __name__ == '__main__':
     df = df.iloc[dstartrow:dendrow, columns.index].fillna(0)
     df.columns = columns
     df.reset_index(drop=True)
-    print("totals un-adjusted {}:")
+    print("totals un-adjusted:")
     print(df.sum()),
 
 
     df = df.applymap(destring)
-    # df.applymap(float)
 
     inflation = pd.read_excel(
         'inflation.xlsx',
         index_col=0
     )
     avgs = inflation['Avg'].loc[columns.values]
-    reflators = avgs[2017] / avgs
-    # df = df * reflators
+    reflators = avgs[2020] / avgs
     df = df.multiply(reflators)
     tdf = df.replace(0, np.nan)
     for t in (False, True):
         run(tdf, trim=t)
-
-
-
-
-
-
-
-
